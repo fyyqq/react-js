@@ -1,5 +1,7 @@
 import { useState, Suspense, useTransition, useEffect} from 'react'
 import { createPortal } from 'react-dom';
+import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
+
 
 import './App.css'
 
@@ -310,6 +312,74 @@ function DataTransitionDemo() {
     );
 }
 
+function BrowserRouterSPA() {
+    return(
+        <>
+        <BrowserRouter>
+        {/* Navigation */}
+        <nav>
+            <Link to="/">Home</Link> | {" "}
+            <Link to="/about">About</Link> | {" "}
+            <Link to="/contact">Contact</Link>
+        </nav>
+            {/* Routes */}
+            <Routes>
+                <Route path='/' element={<HomeRouter />}></Route>
+                <Route path='/about' element={<AboutRouter />}>
+                    <Route path='/about/service-a' element={<ServiceARouter />}></Route>
+                    <Route path='/about/service-b' element={<ServiceBRouter />}></Route>
+                </Route>
+                <Route path='/contact' element={<ContactRouter />}></Route>
+            </Routes>
+        </BrowserRouter>
+        </>
+    );
+}
+
+function HomeRouter() {
+    return <h4>Home</h4>
+}
+function AboutRouter() {
+    return(
+        <>
+        <span style={{ margin: '0px' }}>↓</span>
+        <h4 style={{ margin: '0px' }}>About</h4>
+        <span style={{ margin: '0px' }}>↓</span>
+        <nav style={{ marginBottom: '20px' }}>
+            <Link to="/about/service-a">Service A</Link> |{" "}
+            <Link to="/about/service-b">Service B</Link>
+        </nav> 
+        <Outlet />
+        </>
+    );
+}
+function ServiceARouter() {
+    return <h4>Service A</h4>
+}
+function ServiceBRouter() {
+    return <h4>Service B</h4>
+}
+function ContactRouter() {
+    return <h4>Contact</h4>
+}
+
+function Timer() {
+    const [seconds, setSeconds] = useState(0);
+    const [multiseconds, setMultiSeconds] = useState(0);
+
+    useEffect(() => {
+        setMultiSeconds(() => seconds * 2);
+    }, [seconds]);
+
+    return (
+        <>
+        <p>Second: {seconds}</p>
+        <button onClick={() => setSeconds(s => s + 1) }>Multiply</button>
+        <p>Multi Second: {multiseconds}</p>
+        </>
+    );
+}
+
 
 function App() {
     const containerCss = {
@@ -390,6 +460,14 @@ function App() {
             <section style={sectionStyle}>
                 <h2 className='sectionTitle'>useTransition</h2>
                 <DataTransitionDemo />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>Browser Router (SPA)</h2>
+                <BrowserRouterSPA />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useEffect()</h2>
+                <Timer />
             </section>
         </div>
     )
