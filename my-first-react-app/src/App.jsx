@@ -7,9 +7,6 @@ function Title({count}) {
     const library = 'React';
     return <h1>Welcome to My First {library} - {count}.2.4 App</h1>;
 }
-function Description() {
-    return <p>This is a simple React application.</p>;
-}
 function EmployeeIntroduction({ name, position }) {
     return (
         <b>Hi, My name is {name}, and I am a {position}.</b>
@@ -18,7 +15,6 @@ function EmployeeIntroduction({ name, position }) {
 function Button({onIncrement}) {
     const buttonCss = {
         width: 'max-content',
-        marginTop: '50px',
     }
 
     return (
@@ -239,7 +235,7 @@ return(
 
 
     <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <h2 style={{ color: '#333', margin: '0px' }}>Modal Content</h2>
+        <h3 style={{ color: '#333', margin: '0px' }}>Modal Content</h3>
         <p style={{ color: '#333' }}>This content is rendered outside the App component!</p>
     </Modal>
     </>
@@ -272,7 +268,7 @@ function UseSuspense() {
         <>
         <div>
             <Suspense fallback={<div>Loading...</div>}>
-                <h1>This is Suspense Component</h1>
+                <p>This is Suspense Component</p>
             </Suspense>
         </div>
         </>
@@ -307,7 +303,7 @@ function DataTransitionDemo() {
 
     return(
         <>
-        <input className='rechangeColor' type="text" name='searching' value={input} onChange={handleChange} />
+        <input className='rechangeColor' type="text" placeholder='Type something' name='searching' value={input} onChange={handleChange} />
         {isPending && <p style={{ color: 'red' }}>LOADING RESULTS...............</p>}
         <FetchData query={results} />
         </> 
@@ -317,11 +313,25 @@ function DataTransitionDemo() {
 
 function App() {
     const containerCss = {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gridTemplateRows: 'auto',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        gap: '40px 20px',
+    }
+
+    const sectionStyle = {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: '20px',
+        rowGap: '20px',
+        border: '1px solid gray',
+        padding: '10px',
+        borderRadius: '5px',
+        height: '100%'
     }
 
     const [counter, setCounter] = useState(0);
@@ -329,20 +339,58 @@ function App() {
 
     return (
         <div className="App" style={containerCss}>
-            <Title count={counter} />
-            <Button onIncrement={setIncrement} />
-            <Description />
-            <EmployeeIntroduction name='afiq' position='web developer' />
-            <Parent />
-            <MyForm />
-            <MyToggle />
-            <MyOption />
-            <DoubleInput />
-            <TripleInput />
-            <CheckedRadio />
-            <ButtonShowModal />
-            <UseSuspense />
-            <DataTransitionDemo />
+            <section style={{ gridColumn: '1 / -1', gridRow: '1' }}>
+                <Title count={counter} />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState(0)</h2>
+                <span>{counter}</span>
+                <Button onIncrement={setIncrement} />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>Function Variable</h2>
+                <EmployeeIntroduction name='afiq' position='web developer' />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>Parent props.children</h2>
+                <Parent />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState('')</h2>
+                <MyForm />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState(true)</h2>
+                <MyToggle />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState('Option A') #DefaultValue</h2>
+                <MyOption />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState({}) #DoubleInput</h2>
+                <DoubleInput />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState({}) #TripleInput #DefaultValue</h2>
+                <TripleInput />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useState('B') #TripleInput #DefaultValue</h2>
+                <CheckedRadio />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>createPortal</h2>
+                <ButtonShowModal />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>Suspense (text before finish load)</h2>
+                <UseSuspense />
+            </section>
+            <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useTransition</h2>
+                <DataTransitionDemo />
+            </section>
         </div>
     )
 }

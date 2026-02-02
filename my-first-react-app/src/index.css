@@ -34,6 +34,12 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
+
+h2.sectionTitle {
+  margin: 0px;
+  color: #61DBFB;
+}
+
 /* 
 button {
   border-radius: 8px;
