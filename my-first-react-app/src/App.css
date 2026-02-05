@@ -1,9 +1,12 @@
 #root {
   max-width: 100%;
   width: 100%;
-  padding: 2rem 2rem 5rem 2rem;
   text-align: center;
 }
+
+#root main#container { padding: 8rem 2rem 2rem 2rem; }
+nav .container-fluid { width: 1320px; }
+footer .row:nth-child(1) { height: 30vh; }
 
 .logo {
   height: 6em;
