@@ -349,6 +349,7 @@ function AboutRouter() {
             <Link to="/about/service-a">Service A</Link> |{" "}
             <Link to="/about/service-b">Service B</Link>
         </nav> 
+        <span style={{ margin: '0px' }}>↓</span>
         <Outlet />
         </>
     );
@@ -376,6 +377,40 @@ function Timer() {
         <p>Second: {seconds}</p>
         <button onClick={() => setSeconds(s => s + 1) }>Multiply</button>
         <p>Multi Second: {multiseconds}</p>
+        </>
+    );
+}
+
+function FetchAPI() {
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('https://jsonplaceholder.typicode.com/posts')
+        .then(response => response.json())
+        .then(data => {
+            setPosts(data);
+            setLoading(false);
+        }).catch(error => {
+            console.error('Error fetching data:', error );
+            setLoading(true);
+        });
+    }, []);
+
+    if (loading) return <p>Loading...</p>
+
+    return (
+        <>
+        <div>
+            {posts.slice(0, 10).map(post => {
+                return (
+                    <div key={post.id}>
+                        <h3>{post.title}</h3>
+                        <p>{post.body}</p>
+                    </div>
+                );
+            })}
+        </div>
         </>
     );
 }
@@ -462,12 +497,16 @@ function App() {
                 <DataTransitionDemo />
             </section>
             <section style={sectionStyle}>
+                <h2 className='sectionTitle'>useEffect()</h2>
+                <Timer />
+            </section>
+            <section style={sectionStyle}>
                 <h2 className='sectionTitle'>Browser Router (SPA)</h2>
                 <BrowserRouterSPA />
             </section>
             <section style={sectionStyle}>
-                <h2 className='sectionTitle'>useEffect()</h2>
-                <Timer />
+                <h2 className='sectionTitle'>Fetch API()</h2>
+                <FetchAPI />
             </section>
         </div>
     )
