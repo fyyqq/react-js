@@ -1,11 +1,14 @@
 import Container from "react-bootstrap/Container";
 import { useState, Suspense, useTransition, useEffect} from 'react'
 import { createPortal } from 'react-dom';
-import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
+import { Routes, Route, Link, Outlet } from 'react-router-dom';
+// import { Helmet } from "react-helmet-async";
+import PageTitle from "../hook/usePageTitle";
 
-function Title({count}) {
+function Title({count, title}) {
+    PageTitle(title);
     const library = 'React';
-    return <h1>Welcome to My First {library} - {count}.2.4 App</h1>;
+    return <h1>Welcome to {title} Page | {library} - {count}.2.4 App</h1>;
 }
 function EmployeeIntroduction({ name, position }) {
     return (
@@ -101,36 +104,44 @@ function MyOption() {
     );
 }
 
+function DarkLightModeSetup(toggle) {
+    const inputs = document.querySelectorAll('.rechangeColor');
+    if (toggle) {
+        document.querySelector('footer').style.backgroundColor = 'var(--bs-body-bg)'
+        document.querySelector('footer').style.color = 'var(--bs-body-color)'
+    
+        document.body.style.backgroundColor = 'var(--bs-body-bg)';
+        document.body.style.color= 'var(--bs-body-color)';
+    
+        inputs.forEach(input => {
+            input.style.backgroundColor = "var(--bs-body-bg)";
+            input.style.color = 'var(--bs-body-color)';
+        });
+    } else {
+        document.body.style.backgroundColor = 'var(--bs-body-color)';
+        document.body.style.color= 'var(--bs-body-bg)';
+    
+        document.querySelector('footer').style.backgroundColor = 'var(--bs-body-bg)';
+        document.querySelector('footer').style.color = 'var(--bs-body-color)';
+    
+        inputs.forEach(input => {
+            input.style.backgroundColor = 'var(--bs-body-color)';
+            input.style.color = 'var(--bs-body-bg)';
+        });
+    }
+}
+
 function MyToggle() {
     const [toggle, setToggle] = useState(true);
-    const inputs = document.querySelectorAll('.rechangeColor');
-
+    
     // Use useEffect to update the body's background color
     useEffect(() => {
-        if (toggle) {
-            document.body.style.backgroundColor = '#333'; // Dark mode background
-            document.body.style.color = '#f2f2f2'; // Optional: change body text color for dark mode
-            document.querySelector('footer').style.backgroundColor = '#f2f2f2'
-            document.querySelector('footer').style.color = '#333'
-            inputs.forEach(input => {
-                input.style.backgroundColor = '#333';
-                input.style.color = '#f2f2f2';
-            });
-        } else {
-            document.body.style.backgroundColor = '#f2f2f2'; // Light mode background
-            document.body.style.color = 'black'; // Optional: change body text color for light mode
-            document.querySelector('footer').style.backgroundColor = '#333'
-            document.querySelector('footer').style.color = '#f2f2f2'
-            inputs.forEach(input => {
-                input.style.backgroundColor = '#f2f2f2';
-                input.style.color = '#333';
-            });
-        }
+        DarkLightModeSetup(toggle);
     }, [toggle]);
-    
+
     return(
         <>
-            <button style={{backgroundColor: toggle ? '#f2f2f2' : '#333', color: toggle ? '#333' : '#f2f2f2'}} onClick={() => setToggle(!toggle)}>{toggle ? 'Light Mode' : 'Dark Mode'}</button>
+            <button style={{backgroundColor: toggle ? 'var(--bs-body-color)' : 'var(--bs-body-bg)', color: toggle ? 'var(--bs-body-bg)' : 'var(--bs-body-color)'}} onClick={() => setToggle(!toggle)}>{toggle ? 'Dark Mode' : 'Light Mode'}</button>
         </>
     );
 }
@@ -317,7 +328,7 @@ function DataTransitionDemo() {
 function BrowserRouterSPA() {
     return(
         <>
-        <BrowserRouter>
+        {/* <BrowserRouter> */}
         {/* Navigation */}
         <nav>
             <Link to="/">Home</Link> | {" "}
@@ -333,7 +344,7 @@ function BrowserRouterSPA() {
                 </Route>
                 <Route path='/contact' element={<ContactRouter />}></Route>
             </Routes>
-        </BrowserRouter>
+        {/* </BrowserRouter> */}
         </>
     );
 }
@@ -417,7 +428,12 @@ function FetchAPI() {
     );
 }
 
-function Home() {
+function HomePage({ title }) {
+
+    // <Helmet>
+    //     <title>{title}</title>
+    // </Helmet>
+
     const containerCss = {
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -446,7 +462,7 @@ function Home() {
         <Container className="py-5">
             <div className="App" style={containerCss}>
                 <section style={{ gridColumn: '1 / -1', gridRow: '1' }}>
-                    <Title count={counter} />
+                    <Title count={counter} title={title} />
                 </section>
                 <section style={sectionStyle}>
                     <h2 className='sectionTitle'>useState(0)</h2>
@@ -514,4 +530,5 @@ function Home() {
     );
 }
 
-export default Home;
+export { HomePage, DarkLightModeSetup };
+// Home;

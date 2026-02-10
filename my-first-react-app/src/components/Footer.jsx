@@ -10,10 +10,10 @@ const AppFooter = () => {
                         <h2>Fyqq</h2>
                         <p>ReactJS Project Portfolio.</p>
                         <ul className="list-unstyled mt-2 social-icons d-flex align-items-center justify-content-center column-gap-3">
-                            <li><a href="#facebook" target='blank'><i class="bi bi-facebook text-light"></i></a></li>
-                            <li><a href="#instagram" target='blank'><i class="bi bi-instagram text-light"></i></a></li>
-                            <li><a href="#youtube" target='blank'><i class="bi bi-youtube text-light"></i></a></li>
-                            <li><a href="#twitter" target='blank'><i class="bi bi-twitter text-light"></i></a></li>
+                            <li><a href="#facebook" target='blank'><i className="bi bi-facebook text-light"></i></a></li>
+                            <li><a href="#instagram" target='blank'><i className="bi bi-instagram text-light"></i></a></li>
+                            <li><a href="#youtube" target='blank'><i className="bi bi-youtube text-light"></i></a></li>
+                            <li><a href="#twitter" target='blank'><i className="bi bi-twitter text-light"></i></a></li>
                         </ul>
                     </Col>
                     <Col md={4} className="mb-3 d-flex align-items-center justify-content-center flex-column row-gap-2">
