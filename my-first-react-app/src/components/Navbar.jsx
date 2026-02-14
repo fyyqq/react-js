@@ -51,7 +51,7 @@ function AppNavbar() {
                                 <div className="nav-link" aria-disabled="true"><Link className='fw-normal text-muted' to="/projects">Contact</Link></div>
                             </li>
                         </ul>
-                        <form className="d-flex mx-lg-0 mx-auto w-md-0 w-50" role="search">
+                        <form className="d-flex mx-lg-0 mx-auto w-md-0 w-25" role="search">
                             <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
                             <button className="btn btn-outline-success" type="submit">Search</button>
                         </form>
