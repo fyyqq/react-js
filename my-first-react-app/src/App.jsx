@@ -26,7 +26,7 @@ function App() {
                     <Route path='/' element={ <HomePage title="Home" /> }></Route>
                     <Route path='/projects' element={ <ShowProjects title="Projects" /> }></Route>
                             <Route path='/projects/todo-list-app' element={ <TodoListApp title="Todo List App" />}></Route>
-                            <Route path='/projects/weather-app' element={ <WeatherApp title="Weather App" />}></Route>
+                            <Route path='/projects/search-song-app' element={ <WeatherApp title="Search Song App" />}></Route>
                     <Route path='/contact' element={ <ContactPage title="Contact" /> }></Route>
                 </Routes>
             </main>
