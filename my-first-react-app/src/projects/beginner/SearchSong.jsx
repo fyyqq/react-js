@@ -1,7 +1,7 @@
 import PageTitle from "../../hook/usePageTitle";
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 
-function WeatherApp({ title }) {
+function SearchSongApp({ title }) {
     PageTitle(title);
 
     const [query, setQuery] = useState("");
@@ -10,6 +10,7 @@ function WeatherApp({ title }) {
     const [loading, setLoading] = useState(false);
     const [pickSong, setPickSong] = useState(false);
     const [resetSong, setResetSong] = useState(false);
+    const [playSong, setPlaySong] = useState(false);
 
     useEffect(() => {
         const searchSongs = async () => {
@@ -39,27 +40,118 @@ function WeatherApp({ title }) {
         searchSongs();
     }, [query]);
 
+    const storeSongDetails = (choosen_song) => {
+        return {
+            'id': choosen_song.trackId,
+            'image': choosen_song.artworkUrl100,
+            'title': choosen_song.trackName,
+            'artist': choosen_song.artistName,
+            'genre': choosen_song.primaryGenreName,
+            'releaseDate': choosen_song.releaseDate,
+            'price': choosen_song.trackPrice,
+            'sound': choosen_song.previewUrl,
+            'itunes': choosen_song.trackViewUrl
+        }
+    }
+
+
+    // Load Wishlist
+    const [storeWishlist, setStoreWishlist] = useState(() => {
+        const saved = localStorage.getItem("wishlist");
+        return saved ? JSON.parse(saved) : [];
+    }); 
+
+    // Save Wishlist in LocalStorage
+    useEffect(() => {
+        localStorage.setItem("wishlist", JSON.stringify(storeWishlist));
+    }, [storeWishlist]);
+
+    const ManageWishlistSong = async (element, trackId) => {
+        const wishlist_element = element.children[0].classList;
+        const unwishlist = wishlist_element.contains('bi-star');
+
+        if (unwishlist) {
+            try {
+                const res = await fetch(`https://itunes.apple.com/lookup?id=${trackId}`);
+                const data = await res.json();
+                const wishlistSongDetails = storeSongDetails(data.results[0]);
+
+                setStoreWishlist([...storeWishlist, wishlistSongDetails]);
+
+                element.children[0].classList.remove('bi-star');
+                element.children[0].classList.add('bi-star-fill');
+            } catch (error) {
+                console.error("Error fetching songs:", error);
+            } finally {
+                // setLoading(false);
+            }
+        } else {
+            if (wishlist_element.contains('bi-star-fill')) {
+                element.children[0].classList.remove('bi-star-fill');
+                element.children[0].classList.add('bi-star');
+
+                setStoreWishlist(storeWishlist.filter(wishlist => wishlist.id !== trackId));
+                reset_wishlist_playbtn();
+            }
+        }
+    }
+    
+    const reset_wishlist_playbtn = () => {
+        document.querySelectorAll('#wishlist-song-list button').forEach(btn => {
+            btn.classList.remove('active');
+            btn.children[0].classList.remove('d-none');
+        });
+    }
+
+    const playWishlistSong = (element) => {
+        const play_btn = element.children[0];
+        const pause_btn = element.children[1];
+        
+        const playButton = document.querySelector('.play');
+        const song_id = element.getAttribute('data-id');
+        const pickSongFromWishlist = storeWishlist.find(wishlist => wishlist.id === parseInt(song_id));
+        
+        const wasActive = element.classList.contains('active');
+        
+        document.querySelectorAll('#wishlist-song-list button').forEach(btn => {
+            btn.classList.remove('active');
+            // Also update icons for other buttons to show play
+            if (btn !== element) {
+                if (btn.children[0]) btn.children[0].classList.remove('d-none'); // play_btn
+                if (btn.children[1]) btn.children[1].classList.add('d-none');    // pause_btn
+            }
+        });
+        
+        // If the clicked element was NOT active, then make it active and update its icons
+        if (!wasActive) {
+            element.classList.add('active');
+            if (play_btn) play_btn.classList.add('d-none');
+            if (pause_btn) pause_btn.classList.remove('d-none');
+            setStoreSongs(pickSongFromWishlist);
+            setResetSong(true);
+            setPlaySong(true);
+            setPickSong(true);
+            playButton.click();
+        } else {
+            // If it was active, it's now inactive (due to the forEach loop), so show play and hide pause
+            if (play_btn) play_btn.classList.remove('d-none');
+            if (pause_btn) pause_btn.classList.add('d-none');
+            playButton.click();
+        }
+    }
+
     const ChooseSong = (element) => {
         // const track_id = jQuery(element).attr('data-id');
         const track_id = element.getAttribute('data-id');
         const choosen_song = songs.filter(song => song.trackId == track_id)[0];
         
-        setStoreSongs({
-            id: choosen_song.trackId,
-            image: choosen_song.artworkUrl100,
-            title: choosen_song.trackName,
-            artist: choosen_song.artistName,
-            genre: choosen_song.primaryGenreName,
-            releaseDate: choosen_song.releaseDate,
-            price: choosen_song.trackPrice,
-            sound: choosen_song.previewUrl,
-            itunes: choosen_song.trackViewUrl
-        });
+        setStoreSongs(storeSongDetails(choosen_song));
 
         setResetSong(true);
         setPickSong(true);
         setQuery("");
         setSongs([]);
+        reset_wishlist_playbtn();
     }
 
     // Move player logic inside useEffect to ensure DOM elements are available
@@ -170,11 +262,9 @@ function WeatherApp({ title }) {
             playButton.classList.remove('playing');
             audio.load();
         }
-
-        if (resetSong) {
-            resetAudio();
-        }
-
+        
+        if (resetSong) resetAudio();
+        if (playSong) togglePlay();
             
         // Add event listeners
         audio.addEventListener('play', startSpin);
@@ -225,6 +315,31 @@ function WeatherApp({ title }) {
             </div>
         </div> );
     }
+    const SkeletonWislistLoader = (index) => {
+        return( <div id="search-suggestion-list" key={index} className="border-0 outline-0 w-100 border-top p-2 d-flex align-items-center justify-content-start column-gap-2" style={{ borderLeft: '3px solid white', borderRight: '3px solid white', height: '4em' }}>
+            <div className={`song-img h-100 border-0 ${'skeleton'}`} style={{ width: '55px' }}>
+                <img className="w-100 h-100 border-0" src={''} alt="" style={{ objectFit: 'cover' }} />
+            </div>
+            <div className="song-detail d-flex w-100 align-items-start justify-content-between">
+                <div className="song-name d-flex flex-column align-items-start justify-content-center">
+                    <small className={`fw-bold ${'skeleton'}`}>{ '---------------------' }</small>
+                    <small className={'skeleton'} style={{ fontSize: '12px' }}>{ '----------' }</small>
+                </div>
+                <div className="d-flex column-gap-2">
+                    <div className="song-details d-flex flex-column justify-content-end align-items-end row-gap-1 h-100">
+                        <small className={`fw-bold text-end skeleton`}>{ '----------' }</small>
+                        <small className="text-end skeleton" style={{ fontSize: '12px' }}>{ '-----------------------' }</small>
+                    </div>
+                    <div className="ps-2" style={{ borderLeft: '1px solid gainsboro' }}>
+                        <button className={`h-100 px-2 border-0 skeleton`}>
+                            <i className={`bi bi-play fs-4`}></i>
+                            <i className={`bi bi-pause fs-4`}></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> );
+    }
 
     return (
         <div className="mx-auto">
@@ -262,29 +377,74 @@ function WeatherApp({ title }) {
                 </div>
             </div>
             <div className={`mt-5 d-flex column-gap-3`} id="song-layout">
-                <div className="w-100 bg-light p-3 border d-flex justify-content-start column-gap-3 position-relative" style={{ height: 'max-content'}}>
-                    <div className={`song-img rounded-3 overflow-hidden ${!pickSong ? 'skeleton' : 'border border-1'}`} style={{ width: '30%' }}>
-                        <img className="w-100 h-100 border" src={storeSongs.image} alt="" style={{ objectFit: 'cover' }} />
-                    </div>
-                    <div className="song-detail d-flex flex-column align-items-start justify-content-between" style={{ width: '70%' }}>
-                        <div className="d-flex flex-column align-items-start">
-                            <h4 className={`text-start mb-1 fw-bold pe-4 ${!pickSong ? 'skeleton' : ''}`}>{storeSongs.title || '-'} { !pickSong && '--------------------------' }</h4>
-                            <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '14px' }}>{storeSongs.artist || '-'}{ !pickSong && '--------------' }</p>
+                <div className="w-100 d-flex flex-column row-gap-2">
+                    <div className="w-100 bg-light p-3 border d-flex justify-content-start column-gap-3 position-relative" style={{ height: 'max-content'}}>
+                        <div className={`song-img rounded-3 overflow-hidden ${!pickSong ? 'skeleton' : 'border border-1'}`} style={{ width: '30%' }}>
+                            <img className="w-100 h-100 border" src={storeSongs.image} alt="" style={{ objectFit: 'cover' }} />
                         </div>
-                        <div className="d-flex align-items-end justify-content-between w-100">
-                            <div className="mt-3 d-flex flex-column align-items-start">
-                                <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}><b>Genre</b>: {storeSongs.genre || '-'}</p>
-                                <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}><b>Country</b>: {storeSongs.country || '-'}</p>
-                                <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}><b>Release Date</b>: {storeSongs.releaseDate || '-'}</p>
+                        <div className="song-detail d-flex flex-column align-items-start justify-content-between" style={{ width: '70%' }}>
+                            <div className="d-flex flex-column align-items-start">
+                                <h4 className={`text-start mb-1 fw-bold pe-4 ${!pickSong ? 'skeleton' : ''}`}>{storeSongs.title || '-'} { !pickSong && '--------------------------' }</h4>
+                                <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '14px' }}>{storeSongs.artist || '-'}{ !pickSong && '--------------' }</p>
                             </div>
-                            <h6 className={`mb-0 fw-bold ${!pickSong ? 'skeleton' : ''}`}>${storeSongs.price || '-'}{ !pickSong && '-------' }</h6>
+                            <div className="d-flex align-items-end justify-content-between w-100">
+                                <div className="mt-3 d-flex flex-column align-items-start">
+                                    <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}><b>Genre</b>: {storeSongs.genre || '-'}</p>
+                                    <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}><b>Country</b>: {storeSongs.country || '-'}</p>
+                                    <p className={`text-start mb-0 ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}><b>Release Date</b>: {storeSongs.releaseDate || '-'}</p>
+                                </div>
+                                <h6 className={`mb-0 fw-bold ${!pickSong ? 'skeleton' : ''}`}>${storeSongs.price || '-'}{ !pickSong && '-------' }</h6>
+                            </div>
+                        </div>
+                        <a href={storeSongs.itunes} target="_blank" className="position-absolute top-0 end-0 me-3 mt-2">
+                            <i className={`bi bi-box-arrow-up-right text-primary ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}></i>
+                        </a>
+                    </div>
+                    <div className="w-100 bg-light p-3 border d-flex justify-content-start align-items-center flex-column column-gap-3" style={{ height: 'max-content'}}>
+                        <h2 className={`fs-4 mt-2 mb-0`} style={{ width: 'max-content' }}>⭐ My Favourite Song</h2>
+                        <div className="mt-4 w-100 d-flex flex-column-reverse justify-content-end" style={{ height: '22em', overflow: 'auto'}}>
+                            { Object.keys(storeWishlist).length === 0 ? Array.from({ length: 6 }).map((_, i) => (
+                                <SkeletonWislistLoader key={i} />
+                            )) : storeWishlist.map((wishlist, index) => {
+                                return( <div id="wishlist-song-list" key={index} className="w-100 border-top p-2 d-flex align-items-center justify-content-start column-gap-2">
+                                    <div className={`song-img h-100 border-0`} style={{ width: '55px' }}>
+                                        <img className="w-100 h-100 border-0" src={wishlist.image} alt="" style={{ objectFit: 'cover' }} />
+                                    </div>
+                                    <div className="song-detail d-flex w-100 align-items-start justify-content-between">
+                                        <div className="song-name d-flex flex-column align-items-start justify-content-center row-gap-1">
+                                            <small className={`fw-bold text-start`}>{wishlist.title || '-'}</small>
+                                            <small className="text-start" style={{ fontSize: '12px' }}>{wishlist.artist || '-'}</small>
+                                        </div>
+                                        <div className="d-flex column-gap-3">
+                                            <div className="song-details d-flex flex-column justify-content-end align-items-end row-gap-1 h-100">
+                                                <small className={`fw-bold text-end`}>${wishlist.price || '-'}</small>
+                                                <small className="text-end" style={{ fontSize: '12px' }}>{wishlist.releaseDate || '-'}</small>
+                                            </div>
+                                            <div className="ps-2" style={{ borderLeft: '1px solid gainsboro' }}>
+                                                <button className={`h-100 px-3 btn btn-outline-secondary`} data-id={`${wishlist.id}`} onClick={(e) => playWishlistSong(e.currentTarget)}>
+                                                    <i className={`bi bi-play fs-4`}></i>
+                                                    <i className={`bi bi-pause fs-4`}></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> );
+                            }) }
                         </div>
                     </div>
-                    <a href={storeSongs.itunes} target="_blank" className="position-absolute top-0 end-0 me-3 mt-2">
-                        <i className={`bi bi-box-arrow-up-right text-primary ${!pickSong ? 'skeleton' : ''}`} style={{ fontSize: '12px' }}></i>
-                    </a>
                 </div>
-                <div className="w-100 p-4 border  bg-light">
+                <div className="w-100 p-4 border bg-light position-relative" id="lyrics-song-container">
+                    <div className="border-bottom mb-3 pb-3 d-flex align-items-center justify-content-between flex-sm-row flex-column">
+                        <div className="d-flex flex-column align-items-sm-start align-items-center">
+                            <h2 className={`text-start mb-1 fs-4 p-0 ${!pickSong ? 'skeleton' : ''}`} style={{ width: 'max-content' }}>{ storeSongs.title }{ !pickSong && '--------------------------------' }</h2>
+                            <small className={`text-start m-0 ${!pickSong ? 'skeleton' : ''}`} style={{ width: 'max-content' }}>{ storeSongs.artist }{ !pickSong && '-----------------' }</small>
+                        </div>
+                        <div>
+                            <button className="bg-transparent border-0 mt-sm-0 mt-3" onClick={(e) => ManageWishlistSong(e.currentTarget, storeSongs.id)}>
+                                <i className={`bi text-warning fs-5 ${(storeWishlist.some(wishlist => wishlist.id === storeSongs.id)) ? 'bi-star-fill' : 'bi-star'} ${!pickSong ? 'skeleton' : ''}`}></i>
+                            </button>
+                        </div>
+                    </div>
                     <div className="">
                         <p className={`fw-bold fs-3 text-dark text-start ${!pickSong ? 'skeleton' : ''}`}>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Iure ad quae exercitationem eveniet aliquid suscipit reprehenderit.</p>
                     </div>
@@ -322,4 +482,4 @@ function WeatherApp({ title }) {
     );
 }
 
-export { WeatherApp };
+export { SearchSongApp };

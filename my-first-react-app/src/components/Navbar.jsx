@@ -12,7 +12,7 @@ import { DarkLightModeSetup } from '../pages/Home';
 import { ShowProjects } from '../pages/Projects';
 import { ContactPage } from '../pages/Contact';
 import { TodoListApp } from '../projects/beginner/TodoList';
-import { WeatherApp } from '../projects/beginner/SearchSong';
+import { SearchSongApp } from '../projects/beginner/SearchSong';
 
 function AppNavbar() {
     const [toggle, setToggle] = useState(true);
@@ -63,5 +63,5 @@ function AppNavbar() {
     );
 }
 
-export { ShowProjects, ContactPage, TodoListApp, WeatherApp };
+export { ShowProjects, ContactPage, TodoListApp, SearchSongApp };
 export default AppNavbar;

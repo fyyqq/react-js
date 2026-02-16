@@ -9,6 +9,13 @@
   text-align: center;
 }
 
+#wishlist-song-list button i.bi-pause { display: none; }
+#wishlist-song-list button.active i.bi-pause { display: block; }
+#wishlist-song-list button i.bi-play { display: block; }
+#wishlist-song-list button.active i.bi-play { display: none; }
+
+i.bi-x:hover { color: red !important; }
+
 .skeleton {
     background: #e0e0e0 !important;
     border-radius: 4px !important;
@@ -68,12 +75,14 @@ footer .row:nth-child(1) { height: 30vh; }
 
 /* Audio */
 .player {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translate(-50%, -50px);
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   flex-direction: column;
-  margin-top: 5em;
-  height: 100%;
 }
 .player-controls {
   background-color: #fff;
@@ -102,6 +111,7 @@ footer .row:nth-child(1) { height: 30vh; }
       flex-direction: column;
       justify-content: flex-end;
       width: 230px;
+      overflow: hidden;
       .song-info__title {
           color: #444b59;
           font-size: 0.8rem;
@@ -262,20 +272,22 @@ footer .row:nth-child(1) { height: 30vh; }
 }
 
 @media screen and (max-width: 1025px) {
-  #input_find_song { width: 60%; }
+  #input_find_song { width: 80%; max-width: 80% !important; }
   #song-layout {
     flex-direction: column-reverse;
     row-gap: 10px;
-    width: 60%;
+    width: 80%;
     margin: 0 auto;
   }
   .player { margin: 0px;}
   .player-controls { justify-content: center; }
   .spinner { top: -85px !important; left: -5px !important; }
   .spinner__disc { width: 90px !important; height: 90px !important; }
+  #lyrics-song-container { height: 550px !important; }
 }
 
 @media screen and (max-width: 640px) {
+  #root main#container { padding: 8rem 1rem 2rem 1rem; }
   .App {
     grid-template-columns: 1fr !important;
   }
@@ -286,7 +298,7 @@ footer .row:nth-child(1) { height: 30vh; }
   .song-panel .song-info { width: 80%; }
   .player-controls,
   #song-layout,
-  #input_find_song { width: 100%; }
+  #input_find_song { width: 100%; max-width: 100% !important; }
 }
 
 .card {
